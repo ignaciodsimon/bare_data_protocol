@@ -13,19 +13,16 @@ TParsedBareStruct parseBareFormat(char bareAnswer[])
 	char* _endString;
 	char* _endSubString;
 	int _expectedPayloadSize = 0;
-	TServerAnswer _parsedData = {.acknowledge = 0};
+	TParsedBareStruct _parsedData = {.acknowledge = 0};
 
 	// Checks Start word
 	_newPart = strtok_r(bareAnswer, "$", &_endString);
 	if(strcmp((char *)_newPart, "#"))
 		return _parsedData;
 
-	// Checks acknowledge is OK
+	// Instruction integer
 	_newPart = strtok_r(NULL, "$", &_endString);
-	if(strcmp((char *)_newPart, "OK"))
-		return _parsedData;
-	else
-		_parsedData.acknowledge = 1;
+	_parsedData.acknowledge = atoi(_newPart);
 
 	// Gets rest of header data
 	_newPart = strtok_r(NULL, "$", &_endString);
@@ -42,22 +39,22 @@ TParsedBareStruct parseBareFormat(char bareAnswer[])
 		// Data is a set of positions
 		case 2:
 		// Creates space in memory for data
-		_parsedData.payload = (TPayload*)malloc(sizeof(TPayload) * _expectedPayloadSize);
+		_parsedData.payload = (TPayload3D*)malloc(sizeof(TPayload3D) * _expectedPayloadSize);
 
 		_newPart = strtok_r(NULL, "$", &_endString);
 		while(_newPart)
 		{
 			// Finishes when finds the stop word
-			if(!strcmp((char *)_newPart, "#"))
+			if(!strcmp((char *)_newPart, "!"))
 				return _parsedData;
 
 			// Extracts X, Y and Z data
 			_newSubPart = strtok_r(_newPart, "&", &_endSubString);
-			((TPayload *)_parsedData.payload)[_parsedData.dataLength].x = strtof(_newSubPart, NULL);
+			((TPayload3D *)_parsedData.payload)[_parsedData.dataLength].x = strtof(_newSubPart, NULL);
 			_newSubPart = strtok_r(NULL, "&", &_endSubString);
-			((TPayload *)_parsedData.payload)[_parsedData.dataLength].y = strtof(_newSubPart, NULL);
+			((TPayload3D *)_parsedData.payload)[_parsedData.dataLength].y = strtof(_newSubPart, NULL);
 			_newSubPart = strtok_r(NULL, "&", &_endSubString);
-			((TPayload *)_parsedData.payload)[_parsedData.dataLength].z = strtof(_newSubPart, NULL);
+			((TPayload3D *)_parsedData.payload)[_parsedData.dataLength].z = strtof(_newSubPart, NULL);
 
 			// Accounts for the new data in the structure
 			_parsedData.dataLength ++;
